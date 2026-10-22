@@ -1,0 +1,11 @@
+# The build needs the sources and the configs; e2e/ too, as tsc -b checks it.
+node_modules
+dist
+test-results
+playwright-report
+blob-report
+# The values of the build come from the build arguments. The .env of development (with the user of the e2e tests) and
+# the session of Keycloak saved by the e2e tests stay out of the image.
+.env
+.env.*
+e2e/.auth

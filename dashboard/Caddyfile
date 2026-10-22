@@ -1,0 +1,32 @@
+# Serves the build of the dashboard (dist/) in plain HTTP: Traefik, in front of it, terminates the TLS.
+:80 {
+	root * /srv
+	encode zstd gzip
+
+	# The files of assets/ have the hash of their content in the name, so they never change. One that is missing is a
+	# 404, not the app.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	# The routes of the app (/members, /ranks, …) are not files: the app answers them from index.html. index.html names
+	# the assets of the current build, so it is checked again at each load.
+	@app not path /assets/*
+	header @app Cache-Control "no-cache"
+	@route {
+		not path /assets/*
+		not file
+	}
+	rewrite @route /index.html
+
+	file_server
+
+	# The app loads only its own files and talks only to the core-api and the OpenID Connect provider, whose URLs are build arguments
+	# (CSP_CONNECT_SRC, from the Dockerfile). Mantine writes styles inline, so they are allowed.
+	header {
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' {$CSP_CONNECT_SRC}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+		-Server
+	}
+}
