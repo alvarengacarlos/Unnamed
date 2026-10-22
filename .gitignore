@@ -1,0 +1,38 @@
+# Secrets: the .env of the root and of the dashboard. The example.env are the models.
+.env
+*.local
+
+# Editors and OS
+.idea
+*.iml
+*.iws
+*.ipr
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+*.sw?
+
+# AI assistants: the personal settings. The shared ones (.claude/settings.json, skills...) are versioned.
+.aider*
+.claude/settings.local.json
+
+# Logs
+logs
+*.log
+
+# core-api (Maven)
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+.mvn/wrapper/maven-wrapper.jar
+
+# dashboard (npm, Vite, Playwright)
+node_modules
+dist
+/dashboard/test-results/
+/dashboard/playwright-report/
+/dashboard/blob-report/
+/dashboard/playwright/.cache/
+# The session of the OpenID Connect provider of the e2e tests against the real backend
+/dashboard/e2e/.auth/
+/dashboard/playwright/.auth/
