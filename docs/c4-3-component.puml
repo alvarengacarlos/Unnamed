@@ -1,0 +1,36 @@
+@startuml c4-3-component
+' Layout embutido no PlantUML, para o diagrama renderizar sem o Graphviz instalado
+!pragma layout smetana
+!include <C4/C4_Component>
+
+' C4, nível 3: os componentes da Core API.
+' Nível anterior: c4-2-container.puml
+
+title Componentes: Unnamed - Core API
+
+System_Boundary(unnamed, "Unnamed") {
+    Container(spa, "Dashboard", "React e TypeScript", "Single-page app usada no navegador.")
+
+    Container_Boundary(api, "Core API") {
+        Component(security, "Componente de segurança", "Spring Security", "Valida o token e identifica a organização do usuário.")
+        Component(controllers, "API REST", "Spring MVC", "Endpoints de membros, graus, turmas, mensalidades, graduações e torneios.")
+        Component(job, "Lançamento de mensalidades", "Spring Scheduling", "Lança as mensalidades do mês.")
+        Component(services, "Serviços", "Spring Bean", "Regras de negócio.")
+        Component(repositories, "Repositórios", "jOOQ", "Acesso aos dados da organização.")
+        Component(migrations, "Migrations", "Liquibase", "Cria e atualiza o esquema do banco.")
+    }
+
+    ContainerDb(db, "Banco de dados", "PostgreSQL", "Dados das organizações.")
+}
+
+System_Ext(oidc, "Provedor OpenID Connect", "Autentica os usuários e emite os tokens (ex.: Keycloak).")
+
+Rel_D(spa, security, "Faz requisições para", "JSON/HTTPS")
+Rel_R(security, oidc, "Busca as chaves públicas no", "JWKS/HTTPS")
+Rel_D(security, controllers, "Passa as requisições autenticadas para")
+Rel_D(controllers, services, "Usa")
+Rel_L(job, services, "Usa")
+Rel_D(services, repositories, "Lê e grava usando")
+Rel_D(repositories, db, "Lê e grava em", "JDBC")
+Rel_D(migrations, db, "Atualiza o esquema do", "JDBC")
+@enduml

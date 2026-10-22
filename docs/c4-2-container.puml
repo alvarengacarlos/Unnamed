@@ -1,0 +1,29 @@
+@startuml c4-2-container
+' Layout embutido no PlantUML, para o diagrama renderizar sem o Graphviz instalado
+!pragma layout smetana
+!include <C4/C4_Container>
+
+' C4, nível 2. O Traefik, na frente dos containers, termina o TLS.
+' Nível anterior: c4-1-system-context.puml. Próximo nível: c4-3-component.puml
+
+title Containers: Unnamed
+
+Person(staff, "Equipe da organização", "Administra uma organização de artes marciais.")
+
+System_Ext(oidc, "Provedor OpenID Connect", "Autentica os usuários e emite os tokens (ex.: Keycloak).")
+
+System_Boundary(unnamed, "Unnamed") {
+    Container(static, "Conteúdo estático", "Caddy", "Build do Dashboard: HTML, CSS e JavaScript.")
+    Container(spa, "Dashboard", "React e TypeScript", "Single-page app usada no navegador.")
+    Container(api, "Core API", "Java e Spring Boot", "Regras de negócio, por uma API JSON/HTTP.")
+    ContainerDb(db, "Banco de dados", "PostgreSQL", "Dados das organizações.")
+}
+
+Rel_D(staff, static, "Carrega o Dashboard de")
+Rel_D(staff, spa, "Administra a organização usando")
+Rel_R(static, spa, "Entrega")
+Rel_D(spa, api, "Faz requisições para", "JSON/HTTPS")
+Rel_R(spa, oidc, "Faz login pelo", "OpenID Connect")
+Rel_R(api, oidc, "Valida os tokens com o", "JWKS/HTTPS")
+Rel_D(api, db, "Lê e grava em", "JDBC")
+@enduml

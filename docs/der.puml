@@ -1,0 +1,47 @@
+@startuml der
+' Layout embutido no PlantUML, para o diagrama renderizar sem o Graphviz instalado
+!pragma layout smetana
+
+' Banco do core-api (unnamed). Todas as tabelas têm organization_id, sem FK:
+' é o UUID da organização que vem no claim do token (JWT_ORGANIZATION_CLAIM).
+' Cada linha é uma chave estrangeira. || é o lado referenciado (exatamente um);
+' o{ é o lado da FK, com zero ou muitos, e o| com zero ou um, quando um UNIQUE limita a FK a uma linha.
+
+hide circle
+hide empty members
+
+entity RANK_CATEGORIES
+entity RANKS
+entity MEMBERS
+entity TEACHERS
+entity STUDENTS
+entity CLAZZES
+entity TUITIONS
+entity STUDENT_ENROLLMENTS
+entity TUITION_PAYMENTS
+entity GRADINGS
+entity GRADING_CANDIDATES
+entity TOURNAMENTS
+entity TOURNAMENT_COMPETITORS
+entity TOURNAMENT_MATCHES
+
+RANK_CATEGORIES ||--o{ RANKS
+RANKS ||--o{ MEMBERS
+MEMBERS ||--o| TEACHERS
+MEMBERS ||--o| STUDENTS
+TEACHERS ||--o{ CLAZZES
+STUDENTS ||--o{ STUDENT_ENROLLMENTS
+CLAZZES ||--o{ STUDENT_ENROLLMENTS
+TUITIONS ||--o{ STUDENT_ENROLLMENTS
+STUDENT_ENROLLMENTS ||--o{ TUITION_PAYMENTS
+GRADINGS ||--o{ GRADING_CANDIDATES
+MEMBERS ||--o{ GRADING_CANDIDATES
+RANKS ||--o{ GRADING_CANDIDATES
+TOURNAMENTS ||--o{ TOURNAMENT_COMPETITORS
+MEMBERS ||--o{ TOURNAMENT_COMPETITORS
+TOURNAMENTS ||--o{ TOURNAMENT_MATCHES
+' Duas FKs: o competidor A e o competidor B da luta
+TOURNAMENT_COMPETITORS ||--o{ TOURNAMENT_MATCHES
+TOURNAMENT_COMPETITORS ||--o{ TOURNAMENT_MATCHES
+
+@enduml

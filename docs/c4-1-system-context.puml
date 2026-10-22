@@ -1,0 +1,19 @@
+@startuml c4-1-system-context
+' Layout embutido no PlantUML, para o diagrama renderizar sem o Graphviz instalado
+!pragma layout smetana
+!include <C4/C4_Context>
+
+' C4, nível 1. Próximo nível: c4-2-container.puml
+
+title Contexto: Unnamed
+
+Person(staff, "Equipe da organização", "Administra uma organização de artes marciais.")
+
+System(unnamed, "Unnamed", "Gestão de membros, graus, turmas, mensalidades, graduações e torneios.")
+
+System_Ext(oidc, "Provedor OpenID Connect", "Autentica os usuários e emite os tokens (ex.: Keycloak).")
+
+Rel_D(staff, unnamed, "Administra a organização usando")
+Rel_R(staff, oidc, "Faz login no")
+Rel_R(unnamed, oidc, "Valida os tokens com o")
+@enduml
