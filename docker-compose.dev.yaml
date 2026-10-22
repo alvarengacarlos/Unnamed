@@ -1,0 +1,18 @@
+# Development: the Postgres of the core-api.
+# docker compose -f docker-compose.dev.yaml up -d
+name: unnamed-dev
+
+volumes:
+  postgres_data:
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:?Define DB_USERNAME in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD in .env}
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./dev-init.sql:/docker-entrypoint-initdb.d/dev-init.sql:ro
