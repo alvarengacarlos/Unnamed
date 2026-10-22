@@ -1,0 +1,772 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: alvarengacarlos
+      changes:
+        - createTable:
+            ifNotExists: true
+            tableName: rank_categories
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            ifNotExists: true
+            tableName: ranks
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order
+                  type: SMALLINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rank_category_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rank_category
+                    references: rank_categories(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: ranks
+            constraintName: uq_ranks_rank_category_id_order
+            columnNames: organization_id, rank_category_id, order
+
+        - createTable:
+            ifNotExists: true
+            tableName: members
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: VARCHAR(15)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cpf
+                  type: VARCHAR(14)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gender
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: weight
+                  type: NUMERIC(5,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: height
+                  type: NUMERIC(5,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: birth_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_pwd
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_competitor
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rank_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rank
+                    references: ranks(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: members
+            constraintName: uq_members_cpf
+            columnNames: organization_id, cpf
+
+        - createTable:
+            ifNotExists: true
+            tableName: teachers
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: member_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_member
+                    references: members(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: teachers
+            constraintName: uq_teachers_member_id
+            columnNames: organization_id, member_id
+
+        - createTable:
+            ifNotExists: true
+            tableName: tuitions
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: MONEY
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            ifNotExists: true
+            tableName: students
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: member_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_member
+                    references: members(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: students
+            constraintName: uq_students_member_id
+            columnNames: organization_id, member_id
+
+        - createTable:
+            ifNotExists: true
+            tableName: clazzes
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: martial_art
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_time
+                  type: TIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_time
+                  type: TIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: weekdays
+                  type: VARCHAR[]
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: teacher_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_teacher
+                    references: teachers(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            ifNotExists: true
+            tableName: student_enrollments
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: student_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_student
+                    references: students(id)
+              - column:
+                  name: clazz_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_clazz
+                    references: clazzes(id)
+              - column:
+                  name: tuition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tuition
+                    references: tuitions(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: student_enrollments
+            constraintName: uq_student_enrollments_student_id_clazz_id
+            columnNames: organization_id, student_id, clazz_id
+
+        - createTable:
+            ifNotExists: true
+            tableName: tuition_payments
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: month
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: year
+                  type: SMALLINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_paid
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: student_enrollment_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_student_enrollment
+                    references: student_enrollments(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: tuition_payments
+            constraintName: uq_tuition_payments_student_enrollment_id_month_year
+            columnNames: organization_id, student_enrollment_id, month, year
+
+        - createTable:
+            ifNotExists: true
+            tableName: gradings
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: when
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: where
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: registration_period_start
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: registration_period_end
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: grading_prices
+                  type: JSONB
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            ifNotExists: true
+            tableName: grading_candidates
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: payment_method
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_paid
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rank_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rank
+                    references: ranks(id)
+              - column:
+                  name: grading_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_grading
+                    references: gradings(id)
+              - column:
+                  name: member_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_member
+                    references: members(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: grading_candidates
+            constraintName: uq_grading_candidates_grading_id_member_id
+            columnNames: organization_id, grading_id, member_id
+
+        - createTable:
+            ifNotExists: true
+            tableName: tournaments
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: format
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: division_criterion
+                  type: JSONB
+                  constraints:
+                    nullable: false
+              - column:
+                  name: participation_price
+                  type: MONEY
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date_time
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date_time
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: where
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            ifNotExists: true
+            tableName: tournament_competitors
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: payment_method
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_paid
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: points
+                  type: SMALLINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tournament_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tournament
+                    references: tournaments(id)
+              - column:
+                  name: member_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_member
+                    references: members(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: tournament_competitors
+            constraintName: uq_tournament_competitors_tournament_id_member_id
+            columnNames: organization_id, tournament_id, member_id
+
+        - createTable:
+            ifNotExists: true
+            tableName: tournament_matches
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: when
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: where
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: result
+                  type: VARCHAR
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: competitor_a_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_competitor_a_id
+                    references: tournament_competitors(id)
+              - column:
+                  name: competitor_b_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_competitor_b_id
+                    references: tournament_competitors(id)
+              - column:
+                  name: tournament_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_tournament
+                    references: tournaments(id)
+              - column:
+                  name: organization_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: tournament_matches
+            constraintName: uq_tournament_matches_competitors
+            columnNames: organization_id, tournament_id, competitor_a_id, competitor_b_id
+      rollback:
+        - dropTable:
+            tableName: tournament_matches
+        - dropTable:
+            tableName: tournament_competitors
+        - dropTable:
+            tableName: tournaments
+        - dropTable:
+            tableName: grading_candidates
+        - dropTable:
+            tableName: gradings
+        - dropTable:
+            tableName: tuition_payments
+        - dropTable:
+            tableName: student_enrollments
+        - dropTable:
+            tableName: clazzes
+        - dropTable:
+            tableName: students
+        - dropTable:
+            tableName: tuitions
+        - dropTable:
+            tableName: teachers
+        - dropTable:
+            tableName: members
+        - dropTable:
+            tableName: ranks
+        - dropTable:
+            tableName: rank_categories

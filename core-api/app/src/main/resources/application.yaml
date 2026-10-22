@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: unnamed
+
+  # Values already in the environment take precedence over the .env file.
+  config:
+    import: optional:file:${DOTENV_FILE:.env}[.properties]
+
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    url: ${JDBC_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  # The dev profile applies the migrations on startup. In production, DB_MIGRATE_ON_STARTUP decides.
+  liquibase:
+    enabled: ${DB_MIGRATE_ON_STARTUP:false}
+    change-log: classpath:db/root-changelog.yaml
+
+# The OpenAPI (/v3/api-docs) and the Swagger UI (/swagger-ui.html) are on in every profile and public, even without a
+# token (SecurityConfig.PUBLIC_PATHS), so clients of the API can read them.
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    root: info
+    # jOOQ warns at every start that the open-source edition does not list Postgres 17 as supported; it works.
+    org.jooq.impl.DefaultExecuteContext.logVersionSupport: error
+  # JSON (logstash) for the log collectors of production. The dev and test profiles switch it to plain text.
+  structured:
+    format:
+      console: logstash
+      file: logstash
+
+unnamed:
+  security:
+    jwt:
+      jwk-set-uri: ${JWT_JWK_SET_URI:}
+      audience: ${JWT_AUDIENCE:}
+      issuer: ${JWT_ISSUER:}
+      organization-claim: ${JWT_ORGANIZATION_CLAIM:organization}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  tuition-payments:
+    # Adds the unpaid tuition payments of the month (MonthlyTuitionPaymentJob): day 1 at 00:00 of the time zone of the
+    # server. "-" turns it off, also on startup.
+    monthly-job:
+      cron: ${TUITION_PAYMENTS_JOB_CRON:0 0 0 1 * *}

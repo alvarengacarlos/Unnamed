@@ -1,0 +1,27 @@
+# Applied on top of application.yaml by @IntegrationTest and @E2ETest.
+spring:
+  # The datasource is the Postgres of PostgresContainer, which starts empty with each Spring context.
+  liquibase:
+    enabled: true
+
+unnamed:
+  security:
+    jwt:
+      # Overridden by JwksExtension with the URL of a local JWKS server
+      jwk-set-uri: http://localhost/unused-jwks.json
+      audience: core-api
+      issuer: ""
+      organization-claim: organization
+  cors:
+    allowed-origins: http://localhost:5173
+  tuition-payments:
+    monthly-job:
+      # "-" turns the schedule off: the tests run the job themselves.
+      cron: "-"
+
+logging:
+  # Plain text instead of JSON, easier to read in the test output.
+  structured:
+    format:
+      console: ""
+      file: ""

@@ -1,0 +1,13 @@
+spring:
+  liquibase:
+    enabled: true
+
+logging:
+  # Plain text instead of JSON, easier to read in the terminal.
+  structured:
+    format:
+      console: ""
+      file: ""
+  pattern:
+    # The request and the organization of each line, which the JSON logs carry as fields.
+    correlation: "[%X{requestId:-} %X{organizationId:-}] "
