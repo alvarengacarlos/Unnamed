@@ -38,7 +38,7 @@ Gere as classes do jOOQ e rode a API em http://localhost:8080:
 ```bash
 cd core-api
 ./mvnw clean install -DskipTests
-./mvnw -pl app spring-boot:run -Dspring-boot.run.profiles=dev
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 O fuso horário da aplicação é o do servidor, que deve estar no horário de Brasília (`America/Sao_Paulo`). A imagem Docker já o define (`TZ`); rodando fora dela, use `TZ=America/Sao_Paulo`.
