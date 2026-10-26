@@ -11,6 +11,7 @@ const Tuition = lazy(() => import('./tuition/Tuition'))
 const Clazz = lazy(() => import('./clazz/Clazz'))
 const Grading = lazy(() => import('./grading/Grading'))
 const Tournament = lazy(() => import('./tournament/Tournament'))
+const Assistant = lazy(() => import('./assistant/Assistant'))
 
 export default function AppRoutes() {
     return (
@@ -23,6 +24,7 @@ export default function AppRoutes() {
                 <Route path={RoutePath.CLAZZ} element={<Clazz/>}/>
                 <Route path={RoutePath.GRADING} element={<Grading/>}/>
                 <Route path={RoutePath.TOURNAMENT} element={<Tournament/>}/>
+                <Route path={RoutePath.ASSISTANT} element={<Assistant/>}/>
             </Route>
         </Routes>
     )

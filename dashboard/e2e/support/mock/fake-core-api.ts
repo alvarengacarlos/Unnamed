@@ -12,6 +12,7 @@ import { TournamentFormat, type TournamentOutput } from "../../../src/tournament
 import type { TournamentCompetitorOutput } from "../../../src/tournament-competitor/tournament-competitor.type"
 import { TournamentMatchResult, type TournamentMatchOutput } from "../../../src/tournament-match/tournament-match.type"
 import { DayOfWeek, PaymentMethod, type PaginationOutput } from "../../../src/common/common.type"
+import type { AssistantOutput } from "../../../src/assistant/assistant.type"
 import { mockApiBaseUrl } from "../config"
 import { isValidCpf } from "../unique"
 import { pathOfApi } from "../api-client"
@@ -78,6 +79,11 @@ export class FakeCoreApi {
     }
 
     private route(request: FakeRequest): FakeResponse {
+        if (request.path === "/assistant" && request.method === "POST") {
+            // As the real one, which does not validate the message yet
+            return ok(this.reply(String(asBody(request.body).message)))
+        }
+
         const [, resource, id, action, ...rest] = request.path.split("/")
         const handler = this.handlers()[resource]
         if (!handler || rest.length > 0) {
@@ -122,6 +128,11 @@ export class FakeCoreApi {
         }
 
         throw notMocked(request)
+    }
+
+    // The model is not simulated: the reply only repeats the message, in Markdown as the real one
+    private reply(message: string): AssistantOutput {
+        return { reply: `**Mensagem recebida:** ${message}` }
     }
 
     private page<O>(handler: Handler<Row, O>, query: URLSearchParams): PaginationOutput<O> {

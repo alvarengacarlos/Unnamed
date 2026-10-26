@@ -11,6 +11,7 @@ import { TournamentService } from './tournament/tournament.service';
 import { TournamentCompetitorService } from './tournament-competitor/tournament-competitor.service';
 import { TournamentMatchService } from './tournament-match/tournament-match.service';
 import { SessionService } from './session/session.service';
+import { AssistantService } from './assistant/assistant.service';
 
 export const sessionService = new SessionService(
     import.meta.env.VITE_OIDC_AUTHORITY,
@@ -42,3 +43,5 @@ export const gradingCandidateService = new GradingCandidateService(requestClient
 export const tournamentService = new TournamentService(requestClient)
 export const tournamentCompetitorService = new TournamentCompetitorService(requestClient)
 export const tournamentMatchService = new TournamentMatchService(requestClient)
+
+export const assistantService = new AssistantService(requestClient)

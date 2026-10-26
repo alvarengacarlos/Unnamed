@@ -64,7 +64,8 @@ export enum RoutePath {
     TUITION = '/tuitions',
     CLAZZ = '/clazzes',
     GRADING = '/gradings',
-    TOURNAMENT = '/tournaments'
+    TOURNAMENT = '/tournaments',
+    ASSISTANT = '/assistant'
 }
 
 export interface LabelValue {

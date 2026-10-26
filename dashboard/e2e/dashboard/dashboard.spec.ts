@@ -32,18 +32,19 @@ test.describe("Dashboard", () => {
             { link: "Turmas", path: "/clazzes", tab: "Turmas" },
             { link: "Graduações", path: "/gradings", tab: "Graduações" },
             { link: "Torneios", path: "/tournaments", tab: "Torneios" },
-            { link: "Dashboard", path: "/", tab: null }
+            { link: "Assistente", path: "/assistant", heading: "Assistente" },
+            { link: "Dashboard", path: "/", heading: "Dashboard" }
         ]
         await page.goto("/")
 
-        for (const { link, path, tab } of pages) {
+        for (const { link, path, tab, heading } of pages) {
             await page.getByRole("navigation").getByRole("link", { name: link }).click()
 
             await expect(page).toHaveURL(path)
             if (tab) {
                 await expect(page.getByRole("tab", { name: tab, exact: true })).toBeVisible()
             } else {
-                await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible()
+                await expect(page.getByRole("heading", { name: heading })).toBeVisible()
             }
         }
     })

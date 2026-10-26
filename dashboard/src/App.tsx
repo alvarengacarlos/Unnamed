@@ -41,6 +41,10 @@ export default function App() {
         {
             label: 'Torneios',
             path: RoutePath.TOURNAMENT
+        },
+        {
+            label: 'Assistente',
+            path: RoutePath.ASSISTANT
         }
     ]
 
