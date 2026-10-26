@@ -3,6 +3,10 @@ spring:
   # The datasource is the Postgres of PostgresContainer, which starts empty with each Spring context.
   liquibase:
     enabled: true
+  ai:
+    deepseek:
+      # The tests never call DeepSeek, but the application needs a key to start.
+      api-key: unused
 
 unnamed:
   security:

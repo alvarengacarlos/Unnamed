@@ -20,6 +20,10 @@ spring:
     enabled: ${DB_MIGRATE_ON_STARTUP:false}
     change-log: classpath:db/root-changelog.yaml
 
+  ai:
+    deepseek:
+      api-key: ${AI_API_KEY:}
+
 # The OpenAPI (/v3/api-docs) and the Swagger UI (/swagger-ui.html) are on in every profile and public, even without a
 # token (SecurityConfig.PUBLIC_PATHS), so clients of the API can read them.
 springdoc:

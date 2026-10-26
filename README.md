@@ -19,7 +19,7 @@ Pré-requisitos:
 - JDK 25 (o Maven vem pelo wrapper `./mvnw`)
 - Docker com Compose (também usado pela build e pelos testes, via Testcontainers)
 
-Crie o `.env` da raiz e preencha `JWT_JWK_SET_URI` e `JWT_AUDIENCE` (veja [1.2 Configuração](#12-configuração)):
+Crie o `.env` da raiz e preencha `JWT_JWK_SET_URI`, `JWT_AUDIENCE` e `AI_API_KEY` (veja [1.2 Configuração](#12-configuração)):
 
 ```bash
 cp example.env .env
@@ -60,6 +60,7 @@ O `.env` é lido como um arquivo `.properties`: `CHAVE=valor`, um por linha, com
 | `JWT_AUDIENCE` | sim | Valor que o `aud` do token precisa conter | `core-api` |
 | `JWT_ISSUER` | não | Se preenchida, o `iss` do token precisa ser igual a ela | `https://auth.exemplo.com` |
 | `JWT_ORGANIZATION_CLAIM` | não | Claim com o id da organização. Padrão: `organization`. | `organization` |
+| `AI_API_KEY` | sim | Chave da API do provedor do modelo de IA (hoje, o DeepSeek) | `sk-...` |
 | `CORS_ALLOWED_ORIGINS` | não | Origens liberadas, separadas por vírgula. Padrão: `http://localhost:5173`. | `https://dashboard.exemplo.com,http://localhost:5173` |
 | `DB_MIGRATE_ON_STARTUP` | não | `true` para aplicar as migrations ao iniciar. Padrão: `false`. | `true` |
 | `TUITION_PAYMENTS_JOB_CRON` | não | Quando lançar as mensalidades, em cron de seis campos (segundo, minuto, hora, dia, mês, dia da semana), no fuso do servidor. Elas também são lançadas ao iniciar a API, caso ela estivesse fora do ar na virada do mês. `-` desliga os dois. Padrão: `0 0 0 1 * *`. | `0 0 3 1 * *` |

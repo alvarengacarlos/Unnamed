@@ -24,6 +24,7 @@ services:
       JWT_AUDIENCE: ${JWT_AUDIENCE:?Define JWT_AUDIENCE}
       JWT_ISSUER: ${JWT_ISSUER:?Define JWT_ISSUER}
       JWT_ORGANIZATION_CLAIM: ${JWT_ORGANIZATION_CLAIM:?Define JWT_ORGANIZATION_CLAIM}
+      AI_API_KEY: ${AI_API_KEY:?Define AI_API_KEY}
     networks:
       - traefik_net
 
