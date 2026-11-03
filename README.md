@@ -188,29 +188,71 @@ npm run pw:test:backend
 
 ## 3 Deploy
 
-1. Crie a rede externa do Traefik, se ela ainda não existir:
+1. Crie a rede externa do Traefik e do Postgres, se ela ainda não existir:
 
-   ```bash
-   docker network create traefik_net
-   ```
+```bash
+docker network create traefik_net
 
-2. Crie o `.env` da raiz e preencha todas as variáveis: as do Core API, com `JDBC_URL` apontando para o banco de produção (veja [1.2 Configuração](#12-configuração)), e as `VITE_*` do Dashboard (veja [2.2 Configuração](#22-configuração)):
+docker network create postgres_net
+```
 
-   ```bash
-   cp example.env .env
-   ```
+2. Crie o `.env` da raiz e preencha todas as variáveis: as do Core API, com `JDBC_URL` apontando para o banco de produção (veja [1.2 Configuração](#12-configuração)), as `VITE_*` do Dashboard (veja [2.2 Configuração](#22-configuração)) e `REGISTRY`, o endereço do Docker Registry privado de onde o `docker-compose.yaml` baixa as imagens (por exemplo, `localhost:5000`):
 
-3. Gere o jar do Core API:
+```bash
+cp example.env .env
+```
 
-   ```bash
-   (cd core-api && ./mvnw -B clean package -DskipTests)
-   ```
+3. Aplique as migrations do Liquibase (`core-api/src/main/resources/db/root-changelog.yaml`) no banco de produção. O build da imagem do Core API gera as classes do jOOQ a partir do schema desse banco, então ele precisa estar atualizado antes do build. O plugin do Liquibase usa `JDBC_URL`, `DB_USERNAME` e `DB_PASSWORD` do ambiente:
 
-4. Suba os containers:
+```bash
+set -a && . ./.env && set +a
+cd core-api && ./mvnw liquibase:update
+```
 
-   ```bash
-   docker compose up -d --build
-   ```
+Para ver as migrations pendentes sem aplicar, use `./mvnw liquibase:status`. Sem o `.env`, passe a conexão por `-D`:
+
+```bash
+./mvnw liquibase:update -Dliquibase.url=jdbc:postgresql://host:5432/unnamed -Dliquibase.username=pg -Dliquibase.password=pgpw
+```
+
+4. Faça o build das imagens e envie-as para o registry. O `docker-compose.yaml` não faz o build: ele só usa as imagens que estão no registry.
+
+Carregue as variáveis do `.env` no shell:
+
+```bash
+set -a && . ./.env && set +a
+```
+
+Core API: o build se conecta ao banco de `JDBC_URL`, com `DB_USERNAME` e `DB_PASSWORD`, que chegam a ele como secrets do build e não ficam na imagem. A máquina do build precisa alcançar o banco; se ele estiver no `localhost` dela, acrescente `--network host` ao `docker build`.
+
+```bash
+docker build \
+    --secret id=jdbc_url,env=JDBC_URL \
+    --secret id=db_username,env=DB_USERNAME \
+    --secret id=db_password,env=DB_PASSWORD \
+    -t "$REGISTRY/unnamed/core-api" \
+    core-api
+docker push "$REGISTRY/unnamed/core-api"
+```
+
+Dashboard: as `VITE_*` são gravadas no build, então mudar uma delas exige um novo build da imagem.
+
+```bash
+docker build \
+    --build-arg VITE_API_BASE_URL \
+    --build-arg VITE_OIDC_AUTHORITY \
+    --build-arg VITE_OIDC_CLIENT_ID \
+    -t "$REGISTRY/unnamed/dashboard" \
+    dashboard
+docker push "$REGISTRY/unnamed/dashboard"
+```
+
+5. Baixe as imagens do registry e suba os containers:
+
+```bash
+docker compose pull
+docker compose up -d
+```
 
 ## 4 Documentação
 
