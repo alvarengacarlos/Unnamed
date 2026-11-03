@@ -1,3 +1,6 @@
-# The image only needs the jar (see Dockerfile).
 *
-!target/coreapi-*-exec.jar
+!.mvn
+!mvnw
+!pom.xml
+!checkstyle.xml
+!src

@@ -14,7 +14,7 @@ databaseChangeLog:
                     primaryKey: true
               - column:
                   name: name
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -44,7 +44,7 @@ databaseChangeLog:
                     primaryKey: true
               - column:
                   name: name
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -91,7 +91,7 @@ databaseChangeLog:
                     primaryKey: true
               - column:
                   name: name
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -106,7 +106,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: address
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -215,7 +215,7 @@ databaseChangeLog:
                     primaryKey: true
               - column:
                   name: name
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -287,7 +287,7 @@ databaseChangeLog:
                     primaryKey: true
               - column:
                   name: name
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -452,7 +452,7 @@ databaseChangeLog:
                     primaryKey: true
               - column:
                   name: name
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -462,7 +462,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: where
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -568,7 +568,7 @@ databaseChangeLog:
                     primaryKey: true
               - column:
                   name: name
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -598,7 +598,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: where
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:
@@ -692,7 +692,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: where
-                  type: VARCHAR
+                  type: VARCHAR(200)
                   constraints:
                     nullable: false
               - column:

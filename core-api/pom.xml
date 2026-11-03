@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.alvarengacarlos.unnamed</groupId>
     <artifactId>coreapi</artifactId>
-    <version>0.0.1</version>
+    <version>1.0.0</version>
     <properties>
         <java.version>25</java.version>
         <!-- The .env at the repository root, shared with docker-compose. Read by spring-boot:run. -->
@@ -19,6 +19,10 @@
         <!-- The Postgres of the jOOQ codegen and of the *IT tests, the same version as production. -->
         <postgres.image>postgres:17</postgres.image>
         <codegen.testcontainers.version>1.21.4</codegen.testcontainers.version>
+        <liquibase.propertyFile>src/main/resources/db/liquibase.properties</liquibase.propertyFile>
+        <liquibase.url>${env.JDBC_URL}</liquibase.url>
+        <liquibase.username>${env.DB_USERNAME}</liquibase.username>
+        <liquibase.password>${env.DB_PASSWORD}</liquibase.password>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -180,6 +184,17 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>${postgresql.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
             <!--
                 Starts a throwaway Postgres in Docker, applies the Liquibase changelog and generates the jOOQ classes
                 from it, so the build needs Docker but no database of its own.
@@ -290,6 +305,108 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>codegen-existing-database</id>
+            <activation>
+                <property>
+                    <name>codegen.jdbc.url</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.testcontainers</groupId>
+                        <artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jooq-codegen</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-codegen-maven</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${postgresql.version}</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <id>codegen-generate</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <jdbc>
+                                        <url>${codegen.jdbc.url}</url>
+                                        <user>${codegen.jdbc.user}</user>
+                                        <password>${codegen.jdbc.password}</password>
+                                    </jdbc>
+                                    <generator>
+                                        <database>
+                                            <name>org.jooq.meta.postgres.PostgresDatabase</name>
+                                            <inputSchema>public</inputSchema>
+                                            <excludes>databasechangelog|databasechangeloglock</excludes>
+                                            <forcedTypes>
+                                                <forcedType>
+                                                    <name>INSTANT</name>
+                                                    <includeExpression>.*\.(created_at|updated_at)</includeExpression>
+                                                </forcedType>
+                                                <forcedType>
+                                                    <userType>com.alvarengacarlos.unnamed.coreapi.member.Member.Gender</userType>
+                                                    <enumConverter>true</enumConverter>
+                                                    <includeExpression>members\.gender</includeExpression>
+                                                </forcedType>
+                                                <forcedType>
+                                                    <userType>com.alvarengacarlos.unnamed.coreapi.clazz.Clazz.MartialArt</userType>
+                                                    <enumConverter>true</enumConverter>
+                                                    <includeExpression>clazzes\.martial_art</includeExpression>
+                                                </forcedType>
+                                                <forcedType>
+                                                    <userType>com.alvarengacarlos.unnamed.coreapi.common.PaymentMethod</userType>
+                                                    <enumConverter>true</enumConverter>
+                                                    <includeExpression>.*\.payment_method</includeExpression>
+                                                </forcedType>
+                                                <forcedType>
+                                                    <userType>java.time.Month</userType>
+                                                    <enumConverter>true</enumConverter>
+                                                    <includeExpression>tuition_payments\.month</includeExpression>
+                                                </forcedType>
+                                                <forcedType>
+                                                    <userType>com.alvarengacarlos.unnamed.coreapi.tournament.Tournament.TournamentFormat</userType>
+                                                    <enumConverter>true</enumConverter>
+                                                    <includeExpression>tournaments\.format</includeExpression>
+                                                </forcedType>
+                                                <forcedType>
+                                                    <userType>com.alvarengacarlos.unnamed.coreapi.tournamentmatch.TournamentMatch.TournamentMatchResult</userType>
+                                                    <enumConverter>true</enumConverter>
+                                                    <includeExpression>tournament_matches\.result</includeExpression>
+                                                </forcedType>
+                                            </forcedTypes>
+                                        </database>
+                                        <generate>
+                                            <javaTimeTypes>true</javaTimeTypes>
+                                        </generate>
+                                        <target>
+                                            <packageName>com.alvarengacarlos.unnamed.coreapi.jooq</packageName>
+                                        </target>
+                                    </generator>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <reporting>
         <plugins>
             <plugin>

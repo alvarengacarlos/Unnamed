@@ -34,6 +34,7 @@ import com.alvarengacarlos.unnamed.coreapi.testsupport.E2ETest;
 public class AssistantApiIT {
     private static final String PATH = "/assistant";
     private static final String MESSAGE = "Quantos alunos temos?";
+    private static final String REPLY = "reply ";
 
     @Autowired
     private ApiClient api;
@@ -70,7 +71,7 @@ public class AssistantApiIT {
             .thenReturn(new ChatResponse(List.of(new Generation(new AssistantMessage("Ok")))));
         final int exchanges = AssistantService.MAX_HISTORY + 2;
         final List<AssistantInput.Exchange> history = IntStream.range(0, exchanges)
-            .mapToObj(i -> new AssistantInput.Exchange("message " + i, "reply " + i))
+            .mapToObj(i -> new AssistantInput.Exchange("message " + i, REPLY + i))
             .toList();
 
         api.client(UUID.randomUUID()).post()
@@ -88,7 +89,7 @@ public class AssistantApiIT {
         assertThat(messages.subList(1, messages.size()))
             .extracting(Message::getMessageType, Message::getText)
             .startsWith(tuple(MessageType.USER, "message 2"), tuple(MessageType.ASSISTANT, "reply 2"))
-            .endsWith(tuple(MessageType.ASSISTANT, "reply " + (exchanges - 1)), tuple(MessageType.USER, MESSAGE))
+            .endsWith(tuple(MessageType.ASSISTANT, REPLY + (exchanges - 1)), tuple(MessageType.USER, MESSAGE))
             .hasSize(AssistantService.MAX_HISTORY * 2 + 1);
     }
 
