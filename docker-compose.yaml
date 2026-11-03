@@ -1,18 +1,20 @@
 # Production. The database is external: point JDBC_URL at it.
-# (cd core-api && ./mvnw -B clean package -DskipTests) && docker compose up -d --build
-# The dashboard is built inside its image, so it needs no step before.
+# docker compose pull && docker compose up -d
 # No port is published on the host: Traefik, in the external network traefik_net, forwards the connections to the
 # containers (core-api on 8080, dashboard on 80) and terminates the TLS.
 name: unnamed
 
 networks:
   traefik_net:
+    name: traefik_net
+    external: true
+  postgres_net:
+    name: postgres_net
     external: true
 
 services:
   core-api:
-    build: ./core-api
-    image: unnamed/core-api
+    image: ${REGISTRY:?Define REGISTRY}/unnamed/core-api
     restart: unless-stopped
     environment:
       JDBC_URL: ${JDBC_URL:?Define JDBC_URL}
@@ -27,16 +29,10 @@ services:
       AI_API_KEY: ${AI_API_KEY:?Define AI_API_KEY}
     networks:
       - traefik_net
+      - postgres_net
 
-  # The build of the dashboard served by Caddy. The VITE_* variables go into the build, so changing one needs --build.
   dashboard:
-    build:
-      context: ./dashboard
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:?Define VITE_API_BASE_URL}
-        VITE_OIDC_AUTHORITY: ${VITE_OIDC_AUTHORITY:?Define VITE_OIDC_AUTHORITY}
-        VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:?Define VITE_OIDC_CLIENT_ID}
-    image: unnamed/dashboard
+    image: ${REGISTRY:?Define REGISTRY}/unnamed/dashboard
     restart: unless-stopped
     networks:
       - traefik_net
