@@ -2,7 +2,7 @@
 ' Layout embutido no PlantUML, para o diagrama renderizar sem o Graphviz instalado
 !pragma layout smetana
 
-' Banco do core-api (unnamed). Todas as tabelas têm organization_id, sem FK:
+' Banco do core-api (core_api). Todas as tabelas têm organization_id, sem FK:
 ' é o UUID da organização que vem no claim do token (JWT_ORGANIZATION_CLAIM).
 ' Cada linha é uma chave estrangeira. || é o lado referenciado (exatamente um);
 ' o{ é o lado da FK, com zero ou muitos, e o| com zero ou um, quando um UNIQUE limita a FK a uma linha.

@@ -16,6 +16,7 @@ System_Boundary(unnamed, "Unnamed") {
     Container(static, "Conteúdo estático", "Caddy", "Build do Dashboard: HTML, CSS e JavaScript.")
     Container(spa, "Dashboard", "React e TypeScript", "Single-page app usada no navegador.")
     Container(api, "Core API", "Java e Spring Boot", "Regras de negócio, por uma API JSON/HTTP.")
+    Container(migrations, "Migrations", "Liquibase", "Cria e atualiza o esquema do banco.")
     ContainerDb(db, "Banco de dados", "PostgreSQL", "Dados das organizações.")
 }
 
@@ -26,4 +27,5 @@ Rel_D(spa, api, "Faz requisições para", "JSON/HTTPS")
 Rel_R(spa, oidc, "Faz login pelo", "OpenID Connect")
 Rel_R(api, oidc, "Valida os tokens com o", "JWKS/HTTPS")
 Rel_D(api, db, "Lê e grava em", "JDBC")
+Rel_D(migrations, db, "Atualiza o esquema do", "JDBC")
 @enduml

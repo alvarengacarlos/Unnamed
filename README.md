@@ -17,7 +17,7 @@ API com as regras de negócio do dia a dia da organização.
 Pré-requisitos:
 
 - JDK 25 (o Maven vem pelo wrapper `./mvnw`)
-- Docker com Compose (também usado pela build e pelos testes, via Testcontainers)
+- Docker com Compose (banco de desenvolvimento)
 
 Crie o `.env` da raiz e preencha `JWT_JWK_SET_URI`, `JWT_AUDIENCE` e `AI_API_KEY` (veja [1.2 Configuração](#12-configuração)):
 
@@ -31,9 +31,16 @@ Suba o banco de desenvolvimento:
 docker compose -f docker-compose.dev.yaml up -d
 ```
 
-> Não é preciso rodar as migrações: a API as aplica ao iniciar com o profile `dev`.
+Aplique as migrations do Liquibase (`migrations/core-api/root-changelog.yaml`). O plugin usa `JDBC_URL`, `DB_USERNAME` e `DB_PASSWORD` do ambiente:
 
-Gere as classes do jOOQ e rode a API em http://localhost:8080:
+```bash
+set -a && . ./.env && set +a
+cd migrations && ./mvnw liquibase:update -Dliquibase.changeLogFile=core-api/root-changelog.yaml && cd ..
+```
+
+Rode o mesmo comando sempre que uma migration nova for adicionada.
+
+Gere as classes do jOOQ e rode a API em http://localhost:8080. O jOOQ gera as classes a partir do schema do banco de `JDBC_URL`, com `DB_USERNAME` e `DB_PASSWORD` do ambiente, então o banco precisa estar no ar e com as migrations aplicadas. Rode no mesmo shell em que o `.env` foi carregado:
 
 ```bash
 cd core-api
@@ -53,7 +60,7 @@ O `.env` é lido como um arquivo `.properties`: `CHAVE=valor`, um por linha, com
 
 | Variável | Obrigatória | Descrição | Exemplo |
 |---|---|---|---|
-| `JDBC_URL` | sim | URL JDBC do banco | `jdbc:postgresql://localhost:5432/unnamed` |
+| `JDBC_URL` | sim | URL JDBC do banco | `jdbc:postgresql://localhost:5432/core_api` |
 | `DB_USERNAME` | sim | Usuário do banco. Em desenvolvimento, também cria o usuário do banco do `docker-compose.dev.yaml`. | `pg` |
 | `DB_PASSWORD` | sim | Senha do banco. Em desenvolvimento, também define a senha do banco do `docker-compose.dev.yaml`. | `pgpw` |
 | `JWT_JWK_SET_URI` | sim | URL das chaves públicas (JWKS) do emissor dos tokens | `https://auth.exemplo.com/.well-known/jwks.json` |
@@ -62,14 +69,15 @@ O `.env` é lido como um arquivo `.properties`: `CHAVE=valor`, um por linha, com
 | `JWT_ORGANIZATION_CLAIM` | não | Claim com o id da organização. Padrão: `organization`. | `organization` |
 | `AI_API_KEY` | sim | Chave da API do provedor do modelo de IA (hoje, o DeepSeek) | `sk-...` |
 | `CORS_ALLOWED_ORIGINS` | não | Origens liberadas, separadas por vírgula. Padrão: `http://localhost:5173`. | `https://dashboard.exemplo.com,http://localhost:5173` |
-| `DB_MIGRATE_ON_STARTUP` | não | `true` para aplicar as migrations ao iniciar. Padrão: `false`. | `true` |
 | `TUITION_PAYMENTS_JOB_CRON` | não | Quando lançar as mensalidades, em cron de seis campos (segundo, minuto, hora, dia, mês, dia da semana), no fuso do servidor. Elas também são lançadas ao iniciar a API, caso ela estivesse fora do ar na virada do mês. `-` desliga os dois. Padrão: `0 0 0 1 * *`. | `0 0 3 1 * *` |
-| `SPRING_PROFILES_ACTIVE` | não | `dev` aplica as migrations ao iniciar e escreve os logs em texto. | `dev` |
+| `SPRING_PROFILES_ACTIVE` | não | `dev` escreve os logs em texto. | `dev` |
 | `DOTENV_FILE` | não | Caminho de outro arquivo `.env`. Padrão: `.env` no diretório atual. | `/etc/unnamed/.env` |
 
 ### 1.3 Testes
 
 Todos os comandos rodam em `core-api/`.
+
+Os testes de integração e de API rodam no banco de `JDBC_URL`, o mesmo usado para gerar as classes do jOOQ, e esvaziam as tabelas antes de cada teste: os dados desse banco são apagados. O banco precisa estar no ar e com as migrations aplicadas.
 
 #### Unitários
 
@@ -202,17 +210,17 @@ docker network create postgres_net
 cp example.env .env
 ```
 
-3. Aplique as migrations do Liquibase (`core-api/src/main/resources/db/root-changelog.yaml`) no banco de produção. O build da imagem do Core API gera as classes do jOOQ a partir do schema desse banco, então ele precisa estar atualizado antes do build. O plugin do Liquibase usa `JDBC_URL`, `DB_USERNAME` e `DB_PASSWORD` do ambiente:
+3. Aplique as migrations do Liquibase (`migrations/core-api/root-changelog.yaml`) no banco de produção. O build da imagem do Core API gera as classes do jOOQ a partir do schema desse banco, então ele precisa estar atualizado antes do build. O plugin do Liquibase usa `JDBC_URL`, `DB_USERNAME` e `DB_PASSWORD` do ambiente:
 
 ```bash
 set -a && . ./.env && set +a
-cd core-api && ./mvnw liquibase:update
+cd migrations && ./mvnw liquibase:update -Dliquibase.changeLogFile=core-api/root-changelog.yaml
 ```
 
-Para ver as migrations pendentes sem aplicar, use `./mvnw liquibase:status`. Sem o `.env`, passe a conexão por `-D`:
+Para ver as migrations pendentes sem aplicar, use `liquibase:status` no lugar de `liquibase:update`. Sem o `.env`, passe a conexão por `-D`:
 
 ```bash
-./mvnw liquibase:update -Dliquibase.url=jdbc:postgresql://host:5432/unnamed -Dliquibase.username=pg -Dliquibase.password=pgpw
+./mvnw liquibase:update -Dliquibase.changeLogFile=core-api/root-changelog.yaml -Dliquibase.url=jdbc:postgresql://host:5432/core_api -Dliquibase.username=pg -Dliquibase.password=pgpw
 ```
 
 4. Faça o build das imagens e envie-as para o registry. O `docker-compose.yaml` não faz o build: ele só usa as imagens que estão no registry.

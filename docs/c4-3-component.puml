@@ -17,8 +17,9 @@ System_Boundary(unnamed, "Unnamed") {
         Component(job, "Lançamento de mensalidades", "Spring Scheduling", "Lança as mensalidades do mês.")
         Component(services, "Serviços", "Spring Bean", "Regras de negócio.")
         Component(repositories, "Repositórios", "jOOQ", "Acesso aos dados da organização.")
-        Component(migrations, "Migrations", "Liquibase", "Cria e atualiza o esquema do banco.")
     }
+
+    Container(migrations, "Migrations", "Liquibase", "Cria e atualiza o esquema do banco.")
 
     ContainerDb(db, "Banco de dados", "PostgreSQL", "Dados das organizações.")
 }
