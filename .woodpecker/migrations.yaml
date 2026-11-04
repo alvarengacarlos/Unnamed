@@ -1,0 +1,19 @@
+when:
+  - event: manual
+  - event: push
+    branch: master
+    path: "migrations/**"
+
+steps:
+  - name: migrations
+    image: amazoncorretto:25
+    environment:
+      JDBC_URL: jdbc:postgresql://alvarengacarlos.com:2000/core_api
+      DB_USERNAME:
+        from_secret: db_user
+      DB_PASSWORD:
+        from_secret: db_password
+    commands:
+      - dnf install -y -q unzip
+      - cd migrations
+      - ./mvnw -B liquibase:update -Dliquibase.changeLogFile=core-api/root-changelog.yaml

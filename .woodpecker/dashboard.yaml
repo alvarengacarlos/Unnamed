@@ -1,0 +1,27 @@
+when:
+  - event: manual
+  - event: push
+    branch: master
+    path: "dashboard/**"
+
+steps:
+  - name: test
+    image: mcr.microsoft.com/playwright:v1.63.0-noble
+    commands:
+      - cd dashboard
+      - npm ci
+      - npm test
+      - npx playwright test
+
+  - name: build dashboard
+    image: woodpeckerci/plugin-docker-buildx
+    depends_on: [test]
+    settings:
+      repo: alvarengacarlos.com:2001/unnamed/dashboard
+      dockerfile: dashboard/Dockerfile
+      context: dashboard
+      tags: latest
+      build_args:
+        VITE_API_BASE_URL: https://alvarengacarlos.com/unnamed/api/v1
+        VITE_OIDC_AUTHORITY: https://alvarengacarlos.com/keycloak/realms/unnamed
+        VITE_OIDC_CLIENT_ID: web-app

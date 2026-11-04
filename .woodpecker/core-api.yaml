@@ -1,0 +1,50 @@
+when:
+  - event: manual
+  - event: push
+    branch: master
+    path: "core-api/**"
+
+depends_on:
+  - name: migrations
+    optional: true
+
+services:
+  - name: postgres
+    image: postgres:17
+    environment:
+      POSTGRES_DB: core_api
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+
+steps:
+  - name: test
+    image: amazoncorretto:25
+    environment:
+      JDBC_URL: jdbc:postgresql://postgres:5432/core_api
+      DB_USERNAME: test
+      DB_PASSWORD: test
+    commands:
+      - timeout 60 bash -c 'until exec 3<>/dev/tcp/postgres/5432; do sleep 1; done'
+      - dnf install -y -q unzip
+      - cd migrations
+      - ./mvnw -B liquibase:update -Dliquibase.changeLogFile=core-api/root-changelog.yaml
+      - cd ../core-api
+      - ./mvnw -B verify
+
+  - name: build core-api
+    image: woodpeckerci/plugin-docker-buildx
+    depends_on: [test]
+    settings:
+      repo: alvarengacarlos.com:2001/unnamed/core-api
+      dockerfile: core-api/Dockerfile
+      context: core-api
+      tags: latest
+      jdbc_url: jdbc:postgresql://alvarengacarlos.com:2000/core_api
+      db_username:
+        from_secret: db_user
+      db_password:
+        from_secret: db_password
+      secrets:
+        - id=jdbc_url,env=PLUGIN_JDBC_URL
+        - id=db_username,env=PLUGIN_DB_USERNAME
+        - id=db_password,env=PLUGIN_DB_PASSWORD
