@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Empties the test database before each test, so every test starts from a known state.
+ * Empties the database before each test, so every test starts from a known state.
  */
 public class DatabaseCleanerExtension implements BeforeEachCallback {
     @Override

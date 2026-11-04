@@ -1,8 +1,5 @@
 # Applied on top of application.yaml by @IntegrationTest and @E2ETest.
 spring:
-  # The datasource is the Postgres of PostgresContainer, which starts empty with each Spring context.
-  liquibase:
-    enabled: true
   ai:
     deepseek:
       # The tests never call DeepSeek, but the application needs a key to start.

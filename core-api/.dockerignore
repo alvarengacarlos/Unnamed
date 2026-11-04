@@ -3,4 +3,5 @@
 !mvnw
 !pom.xml
 !checkstyle.xml
+!jooq-codegen.xml
 !src

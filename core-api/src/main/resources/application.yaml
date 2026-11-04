@@ -15,11 +15,6 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
-  # The dev profile applies the migrations on startup. In production, DB_MIGRATE_ON_STARTUP decides.
-  liquibase:
-    enabled: ${DB_MIGRATE_ON_STARTUP:false}
-    change-log: classpath:db/root-changelog.yaml
-
   ai:
     deepseek:
       api-key: ${AI_API_KEY:}

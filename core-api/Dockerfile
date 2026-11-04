@@ -1,16 +1,13 @@
 FROM amazoncorretto:25-alpine AS build
 WORKDIR /core-api
 COPY .mvn .mvn
-COPY mvnw pom.xml checkstyle.xml ./
+COPY mvnw pom.xml checkstyle.xml jooq-codegen.xml ./
 COPY src src
 RUN --mount=type=cache,target=/root/.m2 \
     --mount=type=secret,id=jdbc_url,env=JDBC_URL,required=true \
     --mount=type=secret,id=db_username,env=DB_USERNAME,required=true \
     --mount=type=secret,id=db_password,env=DB_PASSWORD,required=true \
-    ./mvnw -B package -DskipTests \
-        -Dcodegen.jdbc.url="$JDBC_URL" \
-        -Dcodegen.jdbc.user="$DB_USERNAME" \
-        -Dcodegen.jdbc.password="$DB_PASSWORD"
+    ./mvnw -B package -DskipTests
 
 FROM amazoncorretto:25-al2023-headless
 # The time zone of the whole application, Brasília time: the JVM reads it from TZ. It decides, for example, when the

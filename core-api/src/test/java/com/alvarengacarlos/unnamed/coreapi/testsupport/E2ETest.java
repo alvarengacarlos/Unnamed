@@ -19,7 +19,7 @@ import com.alvarengacarlos.unnamed.coreapi.App;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @SpringBootTest(
-    classes = {App.class, PostgresContainer.class, ApiClient.class, Database.class, Fixtures.class},
+    classes = {App.class, ApiClient.class, Database.class, Fixtures.class},
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @ExtendWith({JwksExtension.class, OrganizationContextExtension.class, DatabaseCleanerExtension.class})

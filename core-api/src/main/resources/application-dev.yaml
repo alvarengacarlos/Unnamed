@@ -1,7 +1,3 @@
-spring:
-  liquibase:
-    enabled: true
-
 logging:
   # Plain text instead of JSON, easier to read in the terminal.
   structured:

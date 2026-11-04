@@ -13,12 +13,12 @@ import org.springframework.test.context.ActiveProfiles;
 import com.alvarengacarlos.unnamed.coreapi.App;
 
 /**
- * A repository test against a Postgres in Docker ({@link PostgresContainer}). The classes are named *RepositoryIT.
+ * A repository test against the database of JDBC_URL. The classes are named *RepositoryIT.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @SpringBootTest(
-    classes = {App.class, PostgresContainer.class, Database.class, Fixtures.class},
+    classes = {App.class, Database.class, Fixtures.class},
     webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("test")
 @ExtendWith({OrganizationContextExtension.class, DatabaseCleanerExtension.class})
