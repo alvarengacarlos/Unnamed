@@ -45,6 +45,6 @@ steps:
       db_password:
         from_secret: db_password
       secrets:
-        - id=jdbc_url,env=PLUGIN_JDBC_URL
-        - id=db_username,env=PLUGIN_DB_USERNAME
-        - id=db_password,env=PLUGIN_DB_PASSWORD
+        - id=jdbc_url\\,env=PLUGIN_JDBC_URL
+        - id=db_username\\,env=PLUGIN_DB_USERNAME
+        - id=db_password\\,env=PLUGIN_DB_PASSWORD
