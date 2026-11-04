@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -19,6 +20,7 @@ import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,11 @@ public class AssistantApiIT {
 
     @MockitoBean
     private ChatModel chatModel;
+
+    @BeforeEach
+    void stubTheOptionsOfTheModel() {
+        when(chatModel.getOptions()).thenReturn(ChatOptions.builder().build());
+    }
 
     @Test
     void shouldAnswerTheMessageWithTheModel() {
