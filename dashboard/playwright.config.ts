@@ -23,8 +23,8 @@ export default defineConfig({
   testDir: './e2e',
   globalSetup: './e2e/global-setup.ts',
   // With the mocks each test has its own data, so they run in parallel; the real backend is shared, so one at a time
-  fullyParallel: isApiMocked,
-  workers: isApiMocked ? undefined : 1,
+  fullyParallel: isApiMocked && !process.env.CI,
+  workers: isApiMocked && !process.env.CI ? undefined : 1,
   forbidOnly: !!process.env.CI,
   // A regression must fail at the first time, so a flaky test shows up instead of being hidden by a retry
   retries: 0,

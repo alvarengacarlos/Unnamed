@@ -140,7 +140,8 @@ test.describe("Torneios", () => {
         await openTournaments(page)
 
         const panel = page.getByRole("tabpanel")
-        await expect(rowWith(panel, titleMatch.name).getByRole("button", { name: "Possíveis competidores" })).toHaveCount(0)
         await expect(rowWith(panel, singleElimination.name).getByRole("button", { name: "Possíveis competidores" })).toBeVisible()
+        await expect(rowWith(panel, titleMatch.name)).toBeVisible()
+        await expect(rowWith(panel, titleMatch.name).getByRole("button", { name: "Possíveis competidores" })).toHaveCount(0)
     })
 })
