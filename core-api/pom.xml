@@ -62,6 +62,20 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-opentelemetry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+            <version>2.28.0-alpha</version>
+        </dependency>
+        <dependency>
+            <groupId>net.ttddyy.observation</groupId>
+            <artifactId>datasource-micrometer-spring-boot</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>3.0.3</version>
@@ -214,4 +228,39 @@
             </plugin>
         </plugins>
     </reporting>
+    <profiles>
+        <profile>
+            <id>default-jdbc-url</id>
+            <activation>
+                <property>
+                    <name>!env.JDBC_URL</name>
+                </property>
+            </activation>
+            <properties>
+                <codegen.jdbc.url>jdbc:postgresql://localhost:5432/core_api</codegen.jdbc.url>
+            </properties>
+        </profile>
+        <profile>
+            <id>default-db-username</id>
+            <activation>
+                <property>
+                    <name>!env.DB_USERNAME</name>
+                </property>
+            </activation>
+            <properties>
+                <codegen.jdbc.user>pg</codegen.jdbc.user>
+            </properties>
+        </profile>
+        <profile>
+            <id>default-db-password</id>
+            <activation>
+                <property>
+                    <name>!env.DB_PASSWORD</name>
+                </property>
+            </activation>
+            <properties>
+                <codegen.jdbc.password>pgpw</codegen.jdbc.password>
+            </properties>
+        </profile>
+    </profiles>
 </project>

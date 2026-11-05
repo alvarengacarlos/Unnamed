@@ -7,3 +7,14 @@ logging:
   pattern:
     # The request and the organization of each line, which the JSON logs carry as fields.
     correlation: "[%X{requestId:-} %X{organizationId:-}] "
+
+management:
+  opentelemetry:
+    enabled: false
+    map-environment-variables: false
+  tracing:
+    enabled: false
+  otlp:
+    metrics:
+      export:
+        enabled: false

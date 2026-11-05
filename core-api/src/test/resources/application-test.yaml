@@ -20,6 +20,14 @@ unnamed:
       # "-" turns the schedule off: the tests run the job themselves.
       cron: "-"
 
+management:
+  opentelemetry:
+    map-environment-variables: false
+  otlp:
+    metrics:
+      export:
+        enabled: false
+
 logging:
   # Plain text instead of JSON, easier to read in the test output.
   structured:

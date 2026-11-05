@@ -11,9 +11,9 @@ spring:
       enabled: true
 
   datasource:
-    url: ${JDBC_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${JDBC_URL:jdbc:postgresql://localhost:5432/core_api}
+    username: ${DB_USERNAME:pg}
+    password: ${DB_PASSWORD:pgpw}
 
   ai:
     deepseek:
@@ -36,6 +36,20 @@ management:
     health:
       probes:
         enabled: true
+  opentelemetry:
+    resource-attributes:
+      service.name: core-api
+      service.namespace: unnamed
+  tracing:
+    sampling:
+      probability: 1.0
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+jdbc:
+  includes: connection, query
 
 logging:
   level:

@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import io.micrometer.common.KeyValue;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,12 +19,14 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.filter.ServerHttpObservationFilter;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 2)
 public class RequestLoggingFilter extends OncePerRequestFilter {
     public static final String REQUEST_ID_HEADER = "X-Request-Id";
     public static final String REQUEST_ID_MDC_KEY = "requestId";
+    public static final String REQUEST_ID_SPAN_ATTRIBUTE = "request.id";
     private static final Pattern VALID_REQUEST_ID = Pattern.compile("[A-Za-z0-9._-]{1,64}");
     private final Logger accessLogger = LoggerFactory.getLogger(getClass());
 
@@ -35,6 +38,9 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         final String requestId = resolveRequestId(req);
         MDC.put(REQUEST_ID_MDC_KEY, requestId);
         res.setHeader(REQUEST_ID_HEADER, requestId);
+        ServerHttpObservationFilter.findObservationContext(req)
+            .ifPresent(context -> context.addHighCardinalityKeyValue(
+                KeyValue.of(REQUEST_ID_SPAN_ATTRIBUTE, requestId)));
 
         final long start = System.nanoTime();
         Integer status = HttpStatus.INTERNAL_SERVER_ERROR.value();

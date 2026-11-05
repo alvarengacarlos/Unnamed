@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
+import io.micrometer.common.KeyValue;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import com.alvarengacarlos.unnamed.coreapi.common.CommonException;
@@ -27,6 +29,7 @@ import com.alvarengacarlos.unnamed.coreapi.common.CommonException;
 @Component 
 public class OrganizationFilter extends OncePerRequestFilter {
     public static final String ORGANIZATION_ID_MDC_KEY = "organizationId";
+    public static final String ORGANIZATION_ID_SPAN_ATTRIBUTE = "organization.id";
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final HandlerExceptionResolver resolver;
     private final String organizationClaim;
@@ -73,6 +76,9 @@ public class OrganizationFilter extends OncePerRequestFilter {
 
         // RequestLoggingFilter clears it after writing the access log.
         MDC.put(ORGANIZATION_ID_MDC_KEY, organizationId.get().toString());
+        ServerHttpObservationFilter.findObservationContext(req)
+            .ifPresent(context -> context.addHighCardinalityKeyValue(
+                KeyValue.of(ORGANIZATION_ID_SPAN_ATTRIBUTE, organizationId.get().toString())));
         try {
             ScopedValue.where(OrganizationContext.ORGANIZATION, organizationId.get()).call(() -> {
                 chain.doFilter(req, res);
