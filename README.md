@@ -31,7 +31,7 @@ Suba o banco de desenvolvimento:
 docker compose -f docker-compose.dev.yaml up -d
 ```
 
-Aplique as migrations do Liquibase (`migrations/core-api/root-changelog.yaml`). O plugin usa `JDBC_URL`, `DB_USERNAME` e `DB_PASSWORD` do ambiente:
+Aplique as migrations do Liquibase (`migrations/core-api/root-changelog.yaml`). O plugin usa `JDBC_URL`, `DB_USERNAME` e `DB_PASSWORD` do ambiente, que por padrão apontam para o banco do `docker-compose.dev.yaml`:
 
 ```bash
 set -a && . ./.env && set +a
@@ -40,7 +40,7 @@ cd migrations && ./mvnw liquibase:update -Dliquibase.changeLogFile=core-api/root
 
 Rode o mesmo comando sempre que uma migration nova for adicionada.
 
-Gere as classes do jOOQ e rode a API em http://localhost:8080. O jOOQ gera as classes a partir do schema do banco de `JDBC_URL`, com `DB_USERNAME` e `DB_PASSWORD` do ambiente, então o banco precisa estar no ar e com as migrations aplicadas. Rode no mesmo shell em que o `.env` foi carregado:
+Gere as classes do jOOQ e rode a API em http://localhost:8080. O jOOQ gera as classes a partir do schema do banco de `JDBC_URL`, com `DB_USERNAME` e `DB_PASSWORD` do ambiente (por padrão, o banco do `docker-compose.dev.yaml`), então o banco precisa estar no ar e com as migrations aplicadas. Rode no mesmo shell em que o `.env` foi carregado:
 
 ```bash
 cd core-api
@@ -54,15 +54,15 @@ Pelo Maven, o `.env` lido é o da raiz. Para usar outro arquivo, passe `-Ddotenv
 
 ### 1.2 Configuração
 
-O Core API lê cada variável do **ambiente** e, se ela não estiver lá, do **`.env` da raiz**, cujo modelo é o `example.env`. Uma variável definida no ambiente vence a do `.env`.
+O Core API lê cada variável do **ambiente** e, se ela não estiver lá, do **`.env` da raiz**, cujo modelo é o `example.env`. Em produção, os valores vêm gravados na imagem (veja [3 Deploy](#3-deploy)). Uma variável definida no ambiente vence a do `.env`.
 
 O `.env` é lido como um arquivo `.properties`: `CHAVE=valor`, um por linha, comentários com `#`. Não use `export` nem aspas, porque elas viram parte do valor.
 
 | Variável | Obrigatória | Descrição | Exemplo |
 |---|---|---|---|
-| `JDBC_URL` | sim | URL JDBC do banco | `jdbc:postgresql://localhost:5432/core_api` |
-| `DB_USERNAME` | sim | Usuário do banco. Em desenvolvimento, também cria o usuário do banco do `docker-compose.dev.yaml`. | `pg` |
-| `DB_PASSWORD` | sim | Senha do banco. Em desenvolvimento, também define a senha do banco do `docker-compose.dev.yaml`. | `pgpw` |
+| `JDBC_URL` | não | URL JDBC do banco. Padrão: o do `docker-compose.dev.yaml`. | `jdbc:postgresql://localhost:5432/core_api` |
+| `DB_USERNAME` | não | Usuário do banco. Padrão: `pg`, o do `docker-compose.dev.yaml`. | `pg` |
+| `DB_PASSWORD` | não | Senha do banco. Padrão: `pgpw`, o do `docker-compose.dev.yaml`. | `pgpw` |
 | `JWT_JWK_SET_URI` | sim | URL das chaves públicas (JWKS) do emissor dos tokens | `https://auth.exemplo.com/.well-known/jwks.json` |
 | `JWT_AUDIENCE` | sim | Valor que o `aud` do token precisa conter | `core-api` |
 | `JWT_ISSUER` | não | Se preenchida, o `iss` do token precisa ser igual a ela | `https://auth.exemplo.com` |
@@ -70,10 +70,26 @@ O `.env` é lido como um arquivo `.properties`: `CHAVE=valor`, um por linha, com
 | `AI_API_KEY` | sim | Chave da API do provedor do modelo de IA (hoje, o DeepSeek) | `sk-...` |
 | `CORS_ALLOWED_ORIGINS` | não | Origens liberadas, separadas por vírgula. Padrão: `http://localhost:5173`. | `https://dashboard.exemplo.com,http://localhost:5173` |
 | `TUITION_PAYMENTS_JOB_CRON` | não | Quando lançar as mensalidades, em cron de seis campos (segundo, minuto, hora, dia, mês, dia da semana), no fuso do servidor. Elas também são lançadas ao iniciar a API, caso ela estivesse fora do ar na virada do mês. `-` desliga os dois. Padrão: `0 0 0 1 * *`. | `0 0 3 1 * *` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | não | Coletor OTLP/HTTP que recebe traces, métricas e logs. Sem ela, traces e logs não são exportados, mas as métricas continuam tentando `http://localhost:4318`. Ignorada no perfil `dev`. As demais variáveis `OTEL_*` padrão do OpenTelemetry também são aceitas (veja [1.3 Observabilidade](#13-observabilidade)). O caminho de cada sinal (`/v1/traces`, `/v1/metrics`, `/v1/logs`) é acrescentado a ela. | `https://alvarengacarlos.com/otel-collector` |
+| `OTEL_EXPORTER_OTLP_HEADERS` | não | Headers enviados ao coletor, no formato `chave=valor` separados por vírgula, com os valores codificados para URL (o espaço vira `%20`). | `Authorization=Bearer%20<token>` |
 | `SPRING_PROFILES_ACTIVE` | não | `dev` escreve os logs em texto. | `dev` |
 | `DOTENV_FILE` | não | Caminho de outro arquivo `.env`. Padrão: `.env` no diretório atual. | `/etc/unnamed/.env` |
 
-### 1.3 Testes
+### 1.3 Observabilidade
+
+O Core API é instrumentado com o OpenTelemetry pelo `spring-boot-starter-opentelemetry` e exporta os três sinais por OTLP/HTTP para `OTEL_EXPORTER_OTLP_ENDPOINT`, com `service.name=core-api` e `service.namespace=unnamed`:
+
+- **Traces**: requisições HTTP (com `request.id` e `organization.id`), filtros do Spring Security, consultas e conexões JDBC (as do jOOQ inclusive), o job das mensalidades e as chamadas ao modelo de IA e às suas tools (Spring AI). Todas as requisições são amostradas; o `traceparent` (W3C) recebido é respeitado.
+- **Métricas**: HTTP (com histograma de latência), JVM, processo, HikariCP, JDBC, tarefas agendadas e Spring AI, enviadas a cada minuto.
+- **Logs**: os mesmos do console, com `trace_id`, `span_id`, `requestId`, `organizationId` e os campos do log de acesso (`method`, `path`, `status`, `durationMs`).
+
+As variáveis padrão do OpenTelemetry vindas do ambiente são aceitas e vencem o `application.yaml`, por exemplo `OTEL_EXPORTER_OTLP_HEADERS` (autenticação no coletor), `OTEL_TRACES_SAMPLER_ARG` (fração amostrada, de `0` a `1`), `OTEL_METRIC_EXPORT_INTERVAL` (em ms), `OTEL_METRICS_EXPORTER=none` e `OTEL_SDK_DISABLED=true`. Elas só valem quando estão no ambiente, não lidas do `.env` pela aplicação: carregue o `.env` no shell (`set -a && . ./.env && set +a`), como em [1.1 Desenvolvimento](#11-desenvolvimento).
+
+No perfil `dev` o OpenTelemetry fica desligado: nada é exportado, nem com `OTEL_EXPORTER_OTLP_ENDPOINT` definida, e as variáveis `OTEL_*` são ignoradas.
+
+Nos testes nada é exportado.
+
+### 1.4 Testes
 
 Todos os comandos rodam em `core-api/`.
 
@@ -196,71 +212,16 @@ npm run pw:test:backend
 
 ## 3 Deploy
 
-1. Crie a rede externa do Traefik e do Postgres, se ela ainda não existir:
+O Woodpecker (`.woodpecker/`) aplica as migrations, testa e faz o build das imagens, enviando-as para o registry `alvarengacarlos.com:2001`. A configuração de produção é gravada nas imagens durante o build, então os containers sobem sem nenhuma variável:
 
-```bash
-docker network create traefik_net
+- **Core API**: os `build_args` do `.woodpecker/core-api.yaml` viram `ENV` da imagem. Os valores fixos estão no próprio arquivo; os sensíveis vêm dos secrets do Woodpecker `db_user`, `db_password`, `ai_api_key` e `otel_exporter_otlp_headers` (no formato `Authorization=Bearer%20<token>`).
+- **Dashboard**: as `VITE_*` do `.woodpecker/dashboard.yaml` são gravadas no build.
 
-docker network create postgres_net
-```
+Atenção: o registry é público, então qualquer um que baixe a imagem do Core API consegue ler esses valores, inclusive a senha do banco, a chave da IA e o token do coletor (`docker inspect`).
 
-2. Crie o `.env` da raiz e preencha todas as variáveis: as do Core API, com `JDBC_URL` apontando para o banco de produção (veja [1.2 Configuração](#12-configuração)), as `VITE_*` do Dashboard (veja [2.2 Configuração](#22-configuração)) e `REGISTRY`, o endereço do Docker Registry privado de onde o `docker-compose.yaml` baixa as imagens (por exemplo, `localhost:5000`):
+Para mudar um valor, altere o pipeline (ou o secret) e rode-o de novo. Para sobrescrever sem um novo build, passe a variável ao executar o container (`docker run -e VARIAVEL=valor`): ela vence a da imagem.
 
-```bash
-cp example.env .env
-```
-
-3. Aplique as migrations do Liquibase (`migrations/core-api/root-changelog.yaml`) no banco de produção. O build da imagem do Core API gera as classes do jOOQ a partir do schema desse banco, então ele precisa estar atualizado antes do build. O plugin do Liquibase usa `JDBC_URL`, `DB_USERNAME` e `DB_PASSWORD` do ambiente:
-
-```bash
-set -a && . ./.env && set +a
-cd migrations && ./mvnw liquibase:update -Dliquibase.changeLogFile=core-api/root-changelog.yaml
-```
-
-Para ver as migrations pendentes sem aplicar, use `liquibase:status` no lugar de `liquibase:update`. Sem o `.env`, passe a conexão por `-D`:
-
-```bash
-./mvnw liquibase:update -Dliquibase.changeLogFile=core-api/root-changelog.yaml -Dliquibase.url=jdbc:postgresql://host:5432/core_api -Dliquibase.username=pg -Dliquibase.password=pgpw
-```
-
-4. Faça o build das imagens e envie-as para o registry. O `docker-compose.yaml` não faz o build: ele só usa as imagens que estão no registry.
-
-Carregue as variáveis do `.env` no shell:
-
-```bash
-set -a && . ./.env && set +a
-```
-
-Core API: o build se conecta ao banco de `JDBC_URL`, com `DB_USERNAME` e `DB_PASSWORD`, que chegam a ele como secrets do build e não ficam na imagem. A máquina do build precisa alcançar o banco; se ele estiver no `localhost` dela, acrescente `--network host` ao `docker build`.
-
-```bash
-docker build \
-    --secret id=jdbc_url,env=JDBC_URL \
-    --secret id=db_username,env=DB_USERNAME \
-    --secret id=db_password,env=DB_PASSWORD \
-    -t "$REGISTRY/unnamed/core-api" \
-    core-api
-docker push "$REGISTRY/unnamed/core-api"
-```
-
-Dashboard: as `VITE_*` são gravadas no build, então mudar uma delas exige um novo build da imagem.
-
-```bash
-docker build \
-    --build-arg VITE_API_BASE_URL \
-    --build-arg VITE_OIDC_AUTHORITY \
-    --build-arg VITE_OIDC_CLIENT_ID \
-    -t "$REGISTRY/unnamed/dashboard" \
-    dashboard
-docker push "$REGISTRY/unnamed/dashboard"
-```
-
-5. Baixe as imagens do registry e suba os containers:
-
-```bash
-docker compose pull
-docker compose up -d
-```
+As imagens são `alvarengacarlos.com:2001/unnamed/core-api` (porta 8080) e `alvarengacarlos.com:2001/unnamed/dashboard` (porta 80).
 
 ## 4 Documentação
 
