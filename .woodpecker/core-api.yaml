@@ -48,3 +48,19 @@ steps:
         - id=jdbc_url\\,env=PLUGIN_JDBC_URL
         - id=db_username\\,env=PLUGIN_DB_USERNAME
         - id=db_password\\,env=PLUGIN_DB_PASSWORD
+      build_args:
+        JDBC_URL: jdbc:postgresql://alvarengacarlos.com:2000/core_api
+        DB_USERNAME:
+          from_secret: db_user
+        DB_PASSWORD:
+          from_secret: db_password
+        CORS_ALLOWED_ORIGINS: "*"
+        JWT_JWK_SET_URI: https://alvarengacarlos.com/keycloak/realms/unnamed/protocol/openid-connect/certs
+        JWT_AUDIENCE: account
+        JWT_ISSUER: https://alvarengacarlos.com/keycloak/realms/unnamed
+        JWT_ORGANIZATION_CLAIM: organization
+        AI_API_KEY:
+          from_secret: ai_api_key
+        OTEL_EXPORTER_OTLP_ENDPOINT: https://alvarengacarlos.com/otel-collector
+        OTEL_EXPORTER_OTLP_HEADERS:
+          from_secret: otel_exporter_otlp_headers
