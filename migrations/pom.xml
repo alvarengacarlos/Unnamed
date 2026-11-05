@@ -31,4 +31,39 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>default-jdbc-url</id>
+            <activation>
+                <property>
+                    <name>!env.JDBC_URL</name>
+                </property>
+            </activation>
+            <properties>
+                <liquibase.url>jdbc:postgresql://localhost:5432/core_api</liquibase.url>
+            </properties>
+        </profile>
+        <profile>
+            <id>default-db-username</id>
+            <activation>
+                <property>
+                    <name>!env.DB_USERNAME</name>
+                </property>
+            </activation>
+            <properties>
+                <liquibase.username>pg</liquibase.username>
+            </properties>
+        </profile>
+        <profile>
+            <id>default-db-password</id>
+            <activation>
+                <property>
+                    <name>!env.DB_PASSWORD</name>
+                </property>
+            </activation>
+            <properties>
+                <liquibase.password>pgpw</liquibase.password>
+            </properties>
+        </profile>
+    </profiles>
 </project>
