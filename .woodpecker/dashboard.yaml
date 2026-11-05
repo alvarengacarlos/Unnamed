@@ -11,7 +11,7 @@ steps:
       - cd dashboard
       - npm ci
       - npm test
-      - npx playwright test
+      - npm run pw:test
 
   - name: build dashboard
     image: woodpeckerci/plugin-docker-buildx
